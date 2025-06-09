@@ -16,7 +16,7 @@ def load_data():
         'EarnedCreditOverrideReason': 'str',
         'mask_studentpersonkey': 'str'
     }
-    sg = pd.read_csv('Data/StudentTeacherGradeCombined.csv', dtype=dtype_fix, low_memory=False)
+    sg = pd.read_csv('../data/processed/StudentTeacherGradeCombined.csv', dtype=dtype_fix, low_memory=False)
     # remove rows
     sg = sg[sg['AttemptedCredit'].notnull()]
     sg = sg[sg['Mark'].notnull()]

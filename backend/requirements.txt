@@ -1,0 +1,19 @@
+# Web Framework
+fastapi
+fastapi uvicorn
+
+# Core Data Science
+numpy
+pandas
+scikit-learn
+scipy
+statsmodels
+joblib
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Data Handling / APIs
+requests

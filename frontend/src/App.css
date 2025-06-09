@@ -1,0 +1,40 @@
+body {
+  /* font-family: 'Roboto', sans-serif; */
+  font-size: 14px !important;
+}
+
+::placeholder {
+  font-size: 14px !important;
+}
+
+input.form-control {
+  font-size: 14px !important;
+}
+
+.social-icon {
+  color: white;
+  font-size: 0.8rem;
+  transition: color 0.3s ease;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.social-icon:hover {
+  background-color: white;
+  color: #00593c;
+  border: none;
+  outline: none;
+}
+
+.btn-primary {
+  background-color: #00593c !important;
+  border-color: #00593c !important;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 89, 60, 0.5) !important;
+}
