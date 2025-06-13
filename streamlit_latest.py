@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import re
 
 # ---- Configuration for Subject Mapping ----
-# This maps user-friendly subject names to potential DepartmentDesc values in your CSV.
 SUBJECT_TO_DEPT_MAP = {
     'Math': ['MATH', 'MATHEMATICS'],
     'ELA': ['LANGUAGE ARTS', 'ENGLISH', 'ELA'],
