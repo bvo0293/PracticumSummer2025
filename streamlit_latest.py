@@ -9,17 +9,17 @@ from sklearn.preprocessing import StandardScaler
 
 # ---- Configuration for Subject Mapping ----
 SUBJECT_TO_DEPT_MAP = {
-    'Math': ['MATH', 'MATHEMATICS'],
-    'ELA': ['LANGUAGE ARTS', 'ENGLISH', 'ELA'],
-    'Science': ['SCIENCE'],
-    'Social Studies': ['SOCIAL STUDIES', 'HISTORY', 'SOCIAL SCIENCES'],
-    'Health/ PersonalFitness': ['HEALTH', 'PHYSICAL EDUCATION', 'PERSONAL FITNESS', 'HEALTH EDUCATION'],
-    'World Language/ FineArts/ CareerTech': [
+    'MATH': ['MATH', 'MATHEMATICS'],
+    'LANGUAGE ARTS': ['LANGUAGE ARTS', 'ENGLISH', 'ELA'],
+    'SCIENCE': ['SCIENCE'],
+    'SOCIAL SCIENCES': ['SOCIAL STUDIES', 'HISTORY', 'SOCIAL SCIENCES'],
+    'HEALTH/ PERSONALFITNESS': ['HEALTH', 'PHYSICAL EDUCATION', 'PERSONAL FITNESS', 'HEALTH EDUCATION'],
+    'WORLD LANGUAGE/ FINEARTS/ CAREERTECH': [
         'WORLD LANGUAGES', 'SPANISH', 'FRENCH', 'GERMAN',
         'FINE ARTS', 'ART', 'MUSIC', 'THEATRE', 'DANCE',
         'CAREER TECHNICAL AND AGRICULTURAL EDUCATION', 'CAREER AND TECHNICAL EDUCATION', 'CTE', 'BUSINESS', 'TECHNOLOGY'
     ],
-    'Electives': ['ELECTIVE COURSES']
+    'ELECTIVES': ['ELECTIVE COURSES']
 }
 
 
@@ -50,6 +50,8 @@ def assign_granular_difficulty_rank(row):
 def create_student_vectors(_grades_df, _courses_df):
     """Creates a feature vector for each student to represent their academic profile."""
     print("Creating student profile vectors for collaborative filtering...")
+    if 'DepartmentDesc' not in _grades_df.columns:
+        return pd.DataFrame()
     student_subject_marks = _grades_df.pivot_table(index='student_id', columns='DepartmentDesc', values='Mark',
                                                    aggfunc='mean').fillna(0)
     student_overall_avg = _grades_df.groupby('student_id')['Mark'].mean().to_frame('overall_avg_mark')
@@ -77,18 +79,26 @@ def load_all_assets():
     assets = {}
     try:
         # Load data
-        assets['grades'] = pd.read_csv("Final_DF.csv", low_memory=False)
+        assets['grades'] = pd.read_csv("Data/Final_DF.csv", low_memory=False)
         assets['courses'] = pd.read_csv("Data/Courses.csv")
-        grad_summary_df = pd.read_csv("Data/GraduationAreaSummary.csv")
-        grad_summary_df = grad_summary_df.rename(columns={'mask_studentpersonkey': 'student_id'})
-        assets['grad_summary'] = grad_summary_df
+        assets['grad_summary'] = pd.read_csv("Data/GraduationAreaSummary.csv")
+        assets['illuminate'] = pd.read_csv("Data/cleaned_illuminate.csv", low_memory=False)
 
-        # Clean data
-        for df_name in ['grades', 'grad_summary']:
+        # Clean column names for all loaded dataframes
+        for df_name in ['grades', 'courses', 'grad_summary', 'illuminate']:
+            assets[df_name].columns = assets[df_name].columns.str.strip()
+
+        # Rename columns after cleaning
+        assets['grad_summary'] = assets['grad_summary'].rename(columns={'mask_studentpersonkey': 'student_id'})
+
+        # Clean data types and values
+        for df_name in ['grades', 'grad_summary', 'illuminate']:
             assets[df_name]['student_id'] = assets[df_name]['student_id'].astype(str)
         assets['grades']['Mark'] = pd.to_numeric(assets['grades']['Mark'], errors='coerce')
         if 'DepartmentDesc' in assets['grades'].columns:
             assets['grades']['DepartmentDesc'] = assets['grades']['DepartmentDesc'].str.upper().str.strip()
+        if 'Department' in assets['illuminate'].columns:
+            assets['illuminate']['Department'] = assets['illuminate']['Department'].str.upper().str.strip()
 
         # Load ML model and features
         assets['model'] = joblib.load('student_success_model.pkl')
@@ -134,7 +144,7 @@ def generate_ml_recommendations(student_id, assets):
     recommendations = []
     for _, gap in credit_gaps.iterrows():
         subject_area = gap['SubjectArea']
-        department_list = SUBJECT_TO_DEPT_MAP.get(subject_area, [])
+        department_list = SUBJECT_TO_DEPT_MAP.get(subject_area.upper(), [])
         if not department_list: continue
         possible_courses = courses_enhanced[courses_enhanced['DepartmentDesc'].isin(department_list)]
         taken_course_numbers = set(grades_df[grades_df['student_id'] == student_id]['CourseNumber'])
@@ -151,24 +161,20 @@ def generate_ml_recommendations(student_id, assets):
             features_for_pred = features_for_pred[model_features].fillna(0)
             success_prob = model.predict_proba(features_for_pred)[0][1]
             recommendations.append({'SubjectArea': subject_area, 'coursename': course['coursename'],
-                                    'CourseId': course['siscourseidentifier'], 'success_prob': success_prob})
+                                    'CourseId': course['siscourseidentifier'], 'success_prob': success_prob,
+                                    'HonorsDesc': course['HonorsDesc']})
     return pd.DataFrame(recommendations)
 
 
 def get_collaborative_recommendations(target_student_id, assets, k=20, success_threshold=80):
-    """Generates course recommendations based on successful academic peers."""
     student_vectors_df = assets['student_vectors']
     if target_student_id not in student_vectors_df.index: return pd.DataFrame()
-
     target_vector = student_vectors_df.loc[[target_student_id]]
     similarities = cosine_similarity(target_vector, student_vectors_df)[0]
     sim_series = pd.Series(similarities, index=student_vectors_df.index)
     similar_students = sim_series.drop(target_student_id).nlargest(k).index.tolist()
     if not similar_students: return pd.DataFrame()
-
-    grades_df = assets['grades']
-    courses_df = assets['courses']
-
+    grades_df, courses_df = assets['grades'], assets['courses']
     neighbor_grades = grades_df[grades_df['student_id'].isin(similar_students)]
     successful_neighbor_courses = neighbor_grades[neighbor_grades['Mark'] >= success_threshold]
     target_student_courses = set(grades_df[grades_df['student_id'] == target_student_id]['CourseNumber'])
@@ -176,19 +182,23 @@ def get_collaborative_recommendations(target_student_id, assets, k=20, success_t
         ~successful_neighbor_courses['CourseNumber'].isin(target_student_courses)]
     if potential_recs.empty: return pd.DataFrame()
 
-    potential_recs_with_names = pd.merge(
-        potential_recs,
-        courses_df[['siscourseidentifier', 'coursename']],
-        left_on='CourseNumber',
-        right_on='siscourseidentifier',
-        how='left'
-    )
+    # Make the merge and groupby more robust to missing columns
+    detail_cols_to_merge = ['siscourseidentifier', 'coursename', 'HonorsDesc', 'CourseLevelDesc']
+    existing_detail_cols = [col for col in detail_cols_to_merge if col in courses_df.columns]
 
-    course_counts = potential_recs_with_names.groupby(['CourseNumber', 'coursename']).size().reset_index(
-        name='peer_count')
+    potential_recs_with_details = pd.merge(potential_recs, courses_df[existing_detail_cols], left_on='CourseNumber',
+                                           right_on='siscourseidentifier', how='left')
+
+    group_cols = ['CourseNumber', 'coursename']
+    if 'HonorsDesc' in potential_recs_with_details.columns:
+        group_cols.append('HonorsDesc')
+    if 'CourseLevelDesc' in potential_recs_with_details.columns:
+        group_cols.append('CourseLevelDesc')
+
+    course_counts = potential_recs_with_details.groupby(group_cols).size().reset_index(name='peer_count')
     course_counts = course_counts.sort_values(by='peer_count', ascending=False)
 
-    return course_counts[['coursename', 'CourseNumber', 'peer_count']].dropna().head(10)
+    return course_counts.dropna().head(10)
 
 
 # ---- Main Display Function ----
@@ -197,10 +207,60 @@ def display_student_performance(all_data, student_id, department_filter=None, su
 
     grades_df = all_data['grades']
     grad_summary_df = all_data['grad_summary']
+    illuminate_df = all_data['illuminate']
+
     student_df_orig = grades_df[grades_df['student_id'] == str(student_id)].copy()
     if student_df_orig.empty:
         st.warning(f"No data found for student ID: {student_id}")
         return
+
+    # ---- Current Assessment Snapshot Section ----
+    st.subheader("🔔 Current Assessment Snapshot (Illuminate 2025)")
+    student_illuminate_data = illuminate_df[illuminate_df['student_id'] == str(student_id)].copy()
+    student_illuminate_data['Department'] = student_illuminate_data['Department'].str.upper().str.strip()
+
+    if not student_illuminate_data.empty:
+        student_profile = get_student_profile(student_id, grades_df)
+        historical_averages = student_profile.get('subject_avg_marks', {})
+
+        # Ensure 'responsedatevalue' is datetime and handle NaNs robustly
+        student_illuminate_data['responsedatevalue'] = pd.to_datetime(student_illuminate_data['responsedatevalue'],
+                                                                      errors='coerce')
+        student_illuminate_data.dropna(subset=['responsedatevalue', 'Department', 'Response_percent_correct'],
+                                       inplace=True)
+
+        if not student_illuminate_data.empty:
+            # **REVISED LOGIC**: Get the max date for each department
+            latest_dates = student_illuminate_data.groupby('Department')['responsedatevalue'].max().reset_index()
+            latest_dates = latest_dates.rename(columns={'responsedatevalue': 'max_date'})
+
+            # Merge to find all assessments on the latest date for each department
+            latest_assessments = pd.merge(student_illuminate_data, latest_dates, on='Department')
+            latest_assessments = latest_assessments[
+                latest_assessments['responsedatevalue'] == latest_assessments['max_date']]
+
+            # If multiple assessments on the same day, average their scores.
+            final_display_scores = latest_assessments.groupby('Department')[
+                'Response_percent_correct'].mean().reset_index()
+
+            cols = st.columns(len(final_display_scores) if len(final_display_scores) > 0 else 1)
+            col_idx = 0
+            for _, row in final_display_scores.iterrows():
+                dept = row['Department']
+                recent_score = row['Response_percent_correct']
+                historical_avg = historical_averages.get(dept, None)
+                with cols[col_idx]:
+                    st.metric(label=f"Most Recent {dept} Assessment", value=f"{recent_score:.1f}%")
+                    if historical_avg is not None:
+                        delta = recent_score - historical_avg
+                        st.metric(label="vs. Historical Average", value=f"{historical_avg:.1f}%", delta=f"{delta:.1f}%")
+                col_idx += 1
+        else:
+            st.info("No recent Illuminate assessment data with valid dates found for this student.")
+    else:
+        st.info("No recent Illuminate assessment data found for this student.")
+
+    st.markdown("---")
 
     # ---- Generate All Recommendations ----
     ml_recommendations_df = generate_ml_recommendations(student_id, all_data)
@@ -221,8 +281,9 @@ def display_student_performance(all_data, student_id, department_filter=None, su
                         if not subject_recs.empty:
                             subject_recs = subject_recs.sort_values(by='success_prob', ascending=False)
                             for _, row in subject_recs.iterrows():
+                                honor_desc = f"({row['HonorsDesc']})" if pd.notna(row['HonorsDesc']) else ""
                                 st.markdown(
-                                    f"- **{row['coursename']}** (ID: `{row['CourseId']}`) - Predicted Success: **{row['success_prob'] * 100:.0f}%**")
+                                    f"- **{row['coursename']}** {honor_desc} (ID: `{row['CourseId']}`) - Predicted Success: **{row['success_prob'] * 100:.0f}%**")
                         else:
                             st.write("No specific course recommendations generated for this subject.")
                     else:
@@ -239,7 +300,11 @@ def display_student_performance(all_data, student_id, department_filter=None, su
     st.markdown("_Based on courses that students with a similar academic profile to yours have succeeded in._")
     if not collab_recs_df.empty:
         for _, row in collab_recs_df.iterrows():
-            st.markdown(f"- **{row['coursename']}** (ID: `{row['CourseNumber']}`) - Taken by {row['peer_count']} peers")
+            honor_desc = f"({row['HonorsDesc']})" if 'HonorsDesc' in row and pd.notna(row['HonorsDesc']) else ""
+            level_desc = f"{row['CourseLevelDesc']}" if 'CourseLevelDesc' in row and pd.notna(
+                row['CourseLevelDesc']) else ""
+            st.markdown(
+                f"- **{row['coursename']}** {honor_desc} {level_desc} (ID: `{row['CourseNumber']}`) - Taken by {row['peer_count']} peers")
     else:
         st.write("No peer-based recommendations could be generated at this time.")
 
@@ -253,7 +318,7 @@ def display_student_performance(all_data, student_id, department_filter=None, su
         student_df = student_df[student_df['DepartmentDesc'].str.upper() == department_filter.upper()]
         st.info(f"Filtering performance analysis by Department: **{department_filter.upper()}**")
     elif subject_of_interest:
-        department_list = SUBJECT_TO_DEPT_MAP.get(subject_of_interest, [])
+        department_list = SUBJECT_TO_DEPT_MAP.get(subject_of_interest.upper(), [])
         student_df = student_df[student_df['DepartmentDesc'].isin(department_list)]
         st.info(f"Filtering performance analysis by Subject Area: **{subject_of_interest}**")
 
@@ -261,27 +326,19 @@ def display_student_performance(all_data, student_id, department_filter=None, su
         st.warning("No performance data found for the selected filter.")
         return
 
-    # **FIX**: Rename columns *before* they are used for calculations or display.
     student_df = student_df.rename(columns={
         'SchoolYear': 'Year', 'GradeLevel': 'Grade Level', 'CourseDesc': 'Course',
         'MarkingPeriodCode': 'Period', 'Mark': 'Mark', 'EarnedCredit': 'Credit',
         'SchoolDetailFCSId': 'School ID', 'DepartmentDesc': 'Department'
     })
 
-    # Display Table
     with st.expander("📖 View Performance Table (Filtered)", expanded=False):
-        # Use the new, user-friendly column names for display
         display_cols = ['Year', 'Grade Level', 'Course', 'Period', 'Mark', 'Credit', 'Department']
         st.dataframe(student_df[display_cols], use_container_width=True, hide_index=True)
 
-    # Create Timeline for charts
     student_df['Timeline'] = student_df['Year'].astype(str) + '-P' + student_df['Period'].astype(str)
 
-    avg_mark = (
-        student_df.groupby(['Department', 'Timeline'])['Mark']
-        .mean()
-        .unstack(level=0)
-    )
+    avg_mark = student_df.groupby(['Department', 'Timeline'])['Mark'].mean().unstack(level=0)
     if not avg_mark.empty:
         try:
             avg_mark.index = pd.Categorical(avg_mark.index, categories=sorted(avg_mark.index.unique(),
@@ -305,7 +362,45 @@ def display_student_performance(all_data, student_id, department_filter=None, su
         st.write("No credit data available for the current filter.")
 
     st.subheader("💡 Performance Trend Summary (Filtered)")
-    # (Trend analysis logic here)
+
+    departments_for_trend_analysis = []
+    if not avg_mark_filled.empty:
+        if department_filter:
+            departments_for_trend_analysis = [dept.upper() for dept in avg_mark_filled.columns if
+                                              dept.upper() == department_filter.upper()]
+        elif subject_of_interest:
+            departments_for_trend_analysis = [dept.upper() for dept in
+                                              SUBJECT_TO_DEPT_MAP.get(subject_of_interest.upper(), []) if
+                                              dept.upper() in avg_mark_filled.columns]
+        else:
+            departments_for_trend_analysis = avg_mark_filled.columns.tolist()
+
+    trend_recommendations = []
+    if not avg_mark_filled.empty and departments_for_trend_analysis:
+        for dept_to_analyze in departments_for_trend_analysis:
+            marks = avg_mark_filled[dept_to_analyze].dropna()
+            if len(marks) < 2:
+                trend_recommendations.append(f"**{dept_to_analyze}**: Not enough data points to analyze trend.")
+                continue
+
+            x = np.arange(len(marks))
+            y = marks.values
+            slope = np.polyfit(x, y, 1)[0] if np.any(y != y[0]) else 0
+            threshold = 0.05
+
+            if slope > threshold:
+                trend_recommendations.append(f"**{dept_to_analyze}**: Marks are improving (trend: {slope:.2f}).")
+            elif slope < -threshold:
+                trend_recommendations.append(
+                    f"**{dept_to_analyze}**: Marks show a downward trend (trend: {slope:.2f}).")
+            else:
+                trend_recommendations.append(f"**{dept_to_analyze}**: Marks are consistent (trend: {slope:.2f}).")
+
+    if trend_recommendations:
+        for rec in trend_recommendations:
+            st.markdown("- " + rec)
+    else:
+        st.info("No performance trend data to display for the current filter.")
 
     st.subheader("📈 Average Mark Over Time (Filtered)")
     if not avg_mark_filled.empty:
@@ -340,6 +435,7 @@ if all_assets_loaded:
     dept_list = [""] + sorted(all_assets_loaded['grades']['DepartmentDesc'].dropna().unique())
     department_filter_value = st.sidebar.selectbox("Filter Performance by Department:", options=dept_list, index=0)
     if not department_filter_value:
+        # Use uppercase keys for the dropdown options
         subject_list = [""] + list(SUBJECT_TO_DEPT_MAP.keys())
         subject_filter_value = st.sidebar.selectbox("Filter Performance by Subject Area:", options=subject_list,
                                                     index=0)

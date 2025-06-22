@@ -7,7 +7,7 @@ print("Starting data preparation for GBM model...")
 # ---- LOAD ALL NECESSARY DATA ----
 try:
     # Load the main historical grades data
-    grades_df = pd.read_csv("Final_DF.csv", low_memory=False)
+    grades_df = pd.read_csv("Data/Final_DF.csv", low_memory=False)
     print(f"Loaded Final_DF.csv with {len(grades_df)} rows.")
 
     # Load the course catalog

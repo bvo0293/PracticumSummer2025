@@ -13,7 +13,7 @@ print("Starting data preparation for the enhanced GBM model...")
 
 # ---- LOAD ALL DATA ----
 try:
-    grades_df = pd.read_csv("Final_DF.csv", low_memory=False)
+    grades_df = pd.read_csv("Data/Final_DF.csv", low_memory=False)
     courses_df = pd.read_csv("Data/Courses.csv")
     print("Loaded Final_DF.csv and Courses.csv.")
 except FileNotFoundError as e:
@@ -143,7 +143,7 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=['Not Successful (0)', 'Successful (1)']))
 
 # ---- SAVE THE NEWLY TRAINED MODEL ----
-model_filename = 'student_success_model.pkl'
-joblib.dump(model, model_filename)
-print("\n----------------------------------------------------")
-print(f"✅ New model saved to: {model_filename}")
+# model_filename = 'student_success_model.pkl'
+# joblib.dump(model, model_filename)
+# print("\n----------------------------------------------------")
+# print(f"✅ New model saved to: {model_filename}")
