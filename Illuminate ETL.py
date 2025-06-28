@@ -6,7 +6,7 @@ print("Starting enhanced data preparation for Illuminate data...")
 
 # ---- LOAD THE RAW DATA ----
 try:
-    illuminate_df = pd.read_csv("Data/IlluminateData2025.csv", encoding='cp1252', low_memory=False)
+    illuminate_df = pd.read_csv("Data/Not Needed/IlluminateData2025.csv", encoding='cp1252', low_memory=False)
     print(f"Loaded raw IlluminateData2025.csv with {len(illuminate_df)} rows.")
 
 except FileNotFoundError:
