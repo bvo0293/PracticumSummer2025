@@ -39,8 +39,10 @@ def assign_granular_difficulty_rank(row):
         honors_desc = honors_desc.lower()
         if 'ib' in honors_desc:
             bonus_rank = 0.6
-        elif 'ap' in honors_desc or 'dual' in honors_desc:
+        elif 'ap' in honors_desc:
             bonus_rank = 0.4
+        elif 'dual' in honors_desc:
+            bonus_rank = 0.3
         elif 'honors' in honors_desc or 'hr' in honors_desc:
             bonus_rank = 0.2
     return base_rank + bonus_rank

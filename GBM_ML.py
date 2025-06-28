@@ -3,8 +3,10 @@ import numpy as np
 import re
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # =======================
 # DATA PREPARATION
@@ -30,7 +32,7 @@ success_threshold = 80
 grades_df['Success'] = np.where(grades_df['Mark'] >= success_threshold, 1, 0)
 print(f"Defined target variable 'Success' using a threshold of {success_threshold}.")
 
-# ---- ENHANCED FEATURE ENGINEERING
+# ---- ENHANCED FEATURE ENGINEERING ----
 print("Starting enhanced feature engineering...")
 
 # -- Student-Level Features --
@@ -54,7 +56,7 @@ def assign_granular_difficulty_rank(row):
         if match:
             base_rank = float(match.group(1))
 
-    # Determine the bonus rank from 'HonorsDesc'. These are assumption, but they can be changed per business requirements
+    # Determine the bonus rank from 'HonorsDesc'.
     honors_desc = row['HonorsDesc']
     if pd.notna(honors_desc) and isinstance(honors_desc, str):
         honors_desc = honors_desc.lower()
@@ -88,11 +90,11 @@ training_df = pd.merge(
 
 # ---- FINAL CLEANING AND PREPARATION ----
 print("Final cleaning...")
-training_df['course_difficulty_rank'].fillna(1.0, inplace=True)  # Fill any non-merged courses with default rank
+training_df['course_difficulty_rank'].fillna(1.0, inplace=True)
 final_columns = [
     'student_avg_mark_overall',
     'student_avg_mark_in_subject',
-    'course_difficulty_rank',  # Now using the more granular rank
+    'course_difficulty_rank',
     'DepartmentDesc',
     'Success'
 ]
@@ -139,11 +141,32 @@ print("\nEvaluating model performance...")
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Model Accuracy: {accuracy:.4f}")
+
+# **NEW**: Full Classification Report
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=['Not Successful (0)', 'Successful (1)']))
 
+# **NEW**: Feature Importance Plot
+print("\nGenerating Feature Importance Plot...")
+feature_importances = pd.DataFrame({
+    'feature': X.columns,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False).head(10) # Display top 10
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x='importance', y='feature', data=feature_importances, palette='viridis')
+plt.title('Top 10 Feature Importances for Success Prediction Model')
+plt.xlabel('Importance Score')
+plt.ylabel('Feature')
+plt.tight_layout()
+# Save the plot to a file
+plt.savefig('feature_importance.png')
+print("✅ Feature importance plot saved as 'feature_importance.png'")
+
+
 # ---- SAVE THE NEWLY TRAINED MODEL ----
-# model_filename = 'student_success_model.pkl'
-# joblib.dump(model, model_filename)
-# print("\n----------------------------------------------------")
-# print(f"✅ New model saved to: {model_filename}")
+model_filename = 'student_success_model.pkl'
+joblib.dump(model, model_filename)
+print("\n----------------------------------------------------")
+print(f"✅ New model saved to: {model_filename}")
+
