@@ -104,7 +104,7 @@ def load_all_assets():
 
         # Load ML model and features
         assets['model'] = joblib.load('student_success_model.pkl')
-        training_cols_df = pd.read_csv("training_data_v2.csv")
+        training_cols_df = pd.read_csv("Data/training_data_v2.csv")
         assets['model_features'] = training_cols_df.drop('Success', axis=1).columns.tolist()
 
         # Pre-compute student vectors for collaborative filtering

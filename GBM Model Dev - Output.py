@@ -102,7 +102,7 @@ training_df = training_df[final_columns].dropna()
 training_df = pd.get_dummies(training_df, columns=['DepartmentDesc'], prefix='dept')
 
 # ---- SAVE THE NEW TRAINING DATASET ----
-output_filename = "training_data_v2.csv"
+output_filename = "Data/training_data_v2.csv"
 training_df.to_csv(output_filename, index=False)
 print(f"✅ Enhanced data preparation complete! New training data saved to: {output_filename}\n")
 
