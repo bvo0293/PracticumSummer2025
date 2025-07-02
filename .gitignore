@@ -33,7 +33,6 @@ Pipfile.lock
 *.db
 
 # data
-data/
 *.csv
 *.xlsx
 
