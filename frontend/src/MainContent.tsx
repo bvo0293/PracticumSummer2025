@@ -61,6 +61,8 @@ function MainContent({ data }: MainContentProps) {
       <div className="mb-4">
         <Trend trend={trend} />
       </div>
+      <hr />
+
       <h2>II. Recommendations</h2>
       <div className="mb-4">
         <CollabRec collab_rec={collab_rec} />

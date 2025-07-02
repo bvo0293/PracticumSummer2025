@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+ENV/
+Pipfile.lock
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings
+.vscode/
+
+# JetBrains IDEs (e.g. PyCharm)
+.idea/
+*.iml
+# but keep important shared config
+!.idea/misc.xml
+!.idea/modules.xml
+
+# local dev tools / data
+*.log
+*.sqlite3
+*.db
+
+# data
+data/
+*.csv
+*.xlsx
+
+# models
+*.pkl
+
+# node modules (dependencies)
+node_modules/
+
+# build output (production files)
+dist/
+build/
+
+# environment variables
+.env
+.env.*  

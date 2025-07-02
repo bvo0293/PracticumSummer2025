@@ -1,0 +1,16 @@
+@echo off
+
+echo Creating virtual environment...
+python -m venv venv
+
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+
+echo Installing requirements...
+pip install -r requirements.txt
+
+echo Downloading data...
+python app\data\download.py
+
+echo Training models...
+python app\models\train.py
