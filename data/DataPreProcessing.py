@@ -16,10 +16,11 @@ dtype_fix = {
     'mask_studentpersonkey': 'str'
 }
 
-sg2025 = pd.read_csv("data\raw\Student Teacher Grade 2025.csv", dtype=dtype_fix, low_memory=False)
-sg2024 = pd.read_csv('data\raw\Student Teacher Grade 2024.csv', dtype=dtype_fix, low_memory=False)
-sg2023 = pd.read_csv('data\raw\Student Teacher Grade 2023.csv', dtype=dtype_fix, low_memory=False)
-sg2022 = pd.read_csv('data\raw\Student Teacher Grade 2022.csv', dtype=dtype_fix, low_memory=False)
+print("Creating StudentTeacherGradeCombined.csv !!!")
+sg2025 = pd.read_csv("data/raw/Student Teacher Grade 2025.csv", dtype=dtype_fix, low_memory=False)
+sg2024 = pd.read_csv('data/raw/Student Teacher Grade 2024.csv', dtype=dtype_fix, low_memory=False)
+sg2023 = pd.read_csv('data/raw/Student Teacher Grade 2023.csv', dtype=dtype_fix, low_memory=False)
+sg2022 = pd.read_csv('data/raw/Student Teacher Grade 2022.csv', dtype=dtype_fix, low_memory=False)
 # Combine files
 sg = pd.concat([sg2022, sg2023, sg2024, sg2025], ignore_index=True)
 
@@ -46,11 +47,13 @@ sg['CourseDesc'] = sg['CourseDesc'].apply(remove_html_tags)
 sg['CourseDesc'] = sg['CourseDesc'].apply(truncate_text)
 
 sg.to_csv('data\processed\StudentTeacherGradeCombined.csv', index=False)
+print("StudentTeacherGradeCombined.csv created")
 
-illuminate2022 = pd.read_csv('data\raw\IlluminateData2022.csv',encoding="cp1252", low_memory=False)
-illuminate2023 = pd.read_csv('data\raw\IlluminateData2023.csv',encoding="cp1252", low_memory=False)
-illuminate2024 = pd.read_csv('data\raw\IlluminateData2024.csv',encoding="cp1252", low_memory=False)
-illuminate2025 = pd.read_csv('data\raw\IlluminateData2025.csv',encoding="cp1252", low_memory=False)
+print("Creating IlluminateCombined.csv!!!")
+illuminate2022 = pd.read_csv('data/raw/IlluminateData2022.csv',encoding="cp1252", low_memory=False)
+illuminate2023 = pd.read_csv('data/raw/IlluminateData2023.csv',encoding="cp1252", low_memory=False)
+illuminate2024 = pd.read_csv('data/raw/IlluminateData2024.csv',encoding="cp1252", low_memory=False)
+illuminate2025 = pd.read_csv('data/raw/IlluminateData2025.csv',encoding="cp1252", low_memory=False)
 illuminate = pd.concat([illuminate2022, illuminate2023, illuminate2024, illuminate2025], ignore_index=True)
 
 def clean_title_column(df):
@@ -103,16 +106,17 @@ def clean_grade_levels(df):
     df['AssessmentGradeLevel'] = df['AssessmentGradeLevel'].apply(format_grade)
     return df
 illuminate = clean_grade_levels(illuminate)
-illuminate.to_csv('data\processed\IlluminateCombined.csv', index=False)
-
+illuminate.to_csv('data/processed/IlluminateCombined.csv', index=False)
+print("IlluminateCombined.csv created")
 # --------------------------------------------
 
-grad_summary = pd.read_csv("data\raw\GraduationAreaSummary.csv", low_memory=False)
+print("Creating Final_DF.csv !!!")
+grad_summary = pd.read_csv("data/raw/GraduationAreaSummary.csv", low_memory=False)
 
 # Courses.csv (static course catalog)
-courses = pd.read_csv("data\raw\Courses.csv", low_memory=False)
+courses = pd.read_csv("data/raw/Courses.csv", low_memory=False)
 
-all_grades = pd.read_csv("data\processed\StudentTeacherGradeCombined.csv", low_memory=False)
+all_grades = pd.read_csv("data/processed/StudentTeacherGradeCombined.csv", low_memory=False)
 def categorize_grade_level(grade):
     if grade in ['K', '01', '02', '03', '04', '05']:
         return 'Elementary'
@@ -190,4 +194,5 @@ credit_pivot.reset_index(inplace=True)
 # Merge back with hs_grades_cleaned to enrich further
 final_df = hs_grades_cleaned.merge(credit_pivot, on="student_id", how="left")
 
-final_df.to_csv("data\processed\Final_DF.csv"  , index=False)
+final_df.to_csv("data/processed/Final_DF.csv"  , index=False)
+print("Final_DF.csv !!! created")

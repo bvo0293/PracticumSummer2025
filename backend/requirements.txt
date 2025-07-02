@@ -1,10 +1,6 @@
-# Mis
-io
-re
-
 # Web Framework
 fastapi
-fastapi uvicorn
+uvicorn
 streamlit 
 
 # Core Data Science
@@ -20,7 +16,6 @@ xgboost
 matplotlib
 seaborn
 plotly
-base64
 
 # Data Handling / APIs
 requests

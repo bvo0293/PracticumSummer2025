@@ -6,7 +6,7 @@ print("Starting enhanced data preparation for Illuminate data...")
 
 # ---- LOAD THE RAW DATA ----
 try:
-    illuminate_df = pd.read_csv("data\processed\IlluminateCombined.csv", encoding='utf-8', low_memory=False)
+    illuminate_df = pd.read_csv("data/processed/IlluminateCombined.csv", encoding='utf-8', low_memory=False)
     print(f"Loaded raw IlluminateData with {len(illuminate_df)} rows.")
 
 except FileNotFoundError:
@@ -97,7 +97,7 @@ final_columns = [
 final_columns_exist = [col for col in final_columns if col in illuminate_df_filtered.columns]
 cleaned_df = illuminate_df_filtered[final_columns_exist]
 
-output_filename = "data\processed\cleaned_illuminate.csv"
+output_filename = "data/processed/cleaned_illuminate.csv"
 cleaned_df.to_csv(output_filename, index=False)
 
 print("\n----------------------------------------------------")

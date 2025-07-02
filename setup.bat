@@ -1,16 +1,9 @@
 @echo off
 
-echo Creating virtual environment...
-python -m venv venv
+REM start backend
+start cmd /k "backend\venv\Scripts\activate && uvicorn backend.app.main:app --reload"
 
-echo Activating virtual environment...
-call venv\Scripts\activate.bat
+REM start frontend
+start cmd /k "cd frontend && npm run dev"
 
-echo Installing requirements...
-pip install -r requirements.txt
-
-echo Downloading data...
-python app\data\download.py
-
-echo Training models...
-python app\models\train.py
+exit

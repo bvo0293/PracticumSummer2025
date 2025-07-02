@@ -7,11 +7,11 @@ print("Starting data preparation for GBM model...")
 # ---- LOAD ALL NECESSARY DATA ----
 try:
     # Load the main historical grades data
-    grades_df = pd.read_csv("Final_DF.csv", low_memory=False)
+    grades_df = pd.read_csv("data/processed/Final_DF.csv", low_memory=False)
     print(f"Loaded Final_DF.csv with {len(grades_df)} rows.")
 
     # Load the course catalog
-    courses_df = pd.read_csv("Data/Courses.csv")
+    courses_df = pd.read_csv("data/raw/Courses.csv")
     print(f"Loaded Courses.csv with {len(courses_df)} rows.")
 
 except FileNotFoundError as e:
@@ -116,11 +116,9 @@ print("- Performed one-hot encoding on 'DepartmentDesc'.")
 
 
 # ---- SAVE THE DATASET ----
-output_filename = "training_data.csv"
-training_df.to_csv(output_filename, index=False)
+training_df.to_csv( "data/processed/training_data.csv", index=False)
 
 print("\n----------------------------------------------------")
 print(f"✅ Data preparation complete!")
-print(f"Final training data saved to: {output_filename}")
 print(training_df.head())
 

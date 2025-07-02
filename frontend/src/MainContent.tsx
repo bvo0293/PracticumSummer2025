@@ -16,6 +16,8 @@ function MainContent({ data }: MainContentProps) {
   const ml_rec = data.ml_rec ? data.ml_rec : [];
   const needed_credits = data.needed_credits ? data.needed_credits : [];
 
+  if (student_id === "") return <p></p>;
+
   return (
     <div style={{ padding: "16px" }}>
       <h1
