@@ -1,6 +1,11 @@
+# Mis
+io
+re
+
 # Web Framework
 fastapi
 fastapi uvicorn
+streamlit 
 
 # Core Data Science
 numpy
@@ -9,11 +14,13 @@ scikit-learn
 scipy
 statsmodels
 joblib
+xgboost
 
 # Visualization
 matplotlib
 seaborn
 plotly
+base64
 
 # Data Handling / APIs
 requests

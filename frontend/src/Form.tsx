@@ -1,21 +1,20 @@
 import { useState } from "react";
-import type {FormEvent} from "react" ;
+import type { FormEvent } from "react";
+import type { InputStudentData, FormProps } from "./types";
 
-interface StudentData {
-  studentId: string;
-  department?: string;
-}
 
-function Form() {
+function Form({onSubmitSuccess} : FormProps) {
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
+  const [subjectArea, setSubjectArea] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const data:StudentData = {
+    const data: InputStudentData = {
       studentId,
       department: department.trim() === "" ? undefined : department,
+      subjectArea: subjectArea.trim() === "" ? undefined : subjectArea,
     };
 
     try {
@@ -32,7 +31,8 @@ function Form() {
       }
 
       const result = await response.json();
-      alert(`Server response: ${result.message}`);
+      onSubmitSuccess(result);
+
     } catch (error: any) {
       alert(`Failed to submit: ${error.message}`);
     }
@@ -55,7 +55,6 @@ function Form() {
           placeholder="Enter your student ID"
           className="form-control"
           required
-          style={{ width: "100%" }}
         />
       </div>
 
@@ -70,7 +69,20 @@ function Form() {
           onChange={(e) => setDepartment(e.target.value)}
           placeholder="Enter your department"
           className="form-control"
-          style={{ width: "100%" }}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="subjectarea" className="form-label">
+          Subject Area (optional):
+        </label>
+        <input
+          id="subjectarea"
+          type="text"
+          value={subjectArea}
+          onChange={(e) => setSubjectArea(e.target.value)}
+          placeholder="Enter your subject area"
+          className="form-control"
         />
       </div>
 

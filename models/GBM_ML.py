@@ -5,6 +5,7 @@ import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
+import os
 
 # =======================
 # DATA PREPARATION
@@ -13,8 +14,8 @@ print("Starting data preparation for the enhanced GBM model...")
 
 # ---- LOAD ALL DATA ----
 try:
-    grades_df = pd.read_csv("Final_DF.csv", low_memory=False)
-    courses_df = pd.read_csv("Data/Courses.csv")
+    grades_df = pd.read_csv("data/processed/Final_DF.csv" , low_memory=False)
+    courses_df = pd.read_csv("data/raw/Courses.csv")
     print("Loaded Final_DF.csv and Courses.csv.")
 except FileNotFoundError as e:
     print(f"Error: A required data file was not found. Please check your 'Data/' directory. Missing file: {e.filename}")
@@ -100,7 +101,7 @@ training_df = training_df[final_columns].dropna()
 training_df = pd.get_dummies(training_df, columns=['DepartmentDesc'], prefix='dept')
 
 # ---- SAVE THE NEW TRAINING DATASET ----
-output_filename = "training_data_v2.csv"
+output_filename = "data/processed/training_data_v2.csv"
 training_df.to_csv(output_filename, index=False)
 print(f"✅ Enhanced data preparation complete! New training data saved to: {output_filename}\n")
 
@@ -143,7 +144,8 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=['Not Successful (0)', 'Successful (1)']))
 
 # ---- SAVE THE NEWLY TRAINED MODEL ----
-model_filename = 'student_success_model.pkl'
-joblib.dump(model, model_filename)
+model_path = 'models/student_success_model.pkl'
+
+joblib.dump(model, model_path)
 print("\n----------------------------------------------------")
-print(f"✅ New model saved to: {model_filename}")
+print(f"✅ New model saved to: {model_path}")
