@@ -97,8 +97,13 @@ cd ..
 
 ### 7. Run the program
 ```bash
+# On Windows
 setup.bat
+
+# On macOS/Linux
+./setup.sh
 ```
+
 
 ## Contributors
 Vo, Bao; Li, Hui; Nguyen, Duc H
