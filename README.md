@@ -54,8 +54,15 @@ cd PracticumSummer2025
 ### 2. Create a Python virtual environment and install dependencies
 
 ```bash
+# On Windows
 python -m venv backend/venv
 .\backend\venv\Scripts\activate
+```
+```bash
+# On macOS/Linux
+python3 -m venv backend/venv
+source backend/venv/bin/activate
+
 pip install -r backend/requirements.txt
 ```
 
@@ -76,16 +83,33 @@ Student Teacher Grade 2022.csv
 ### 4. Make sure the files are all available then derive processed files
 
 ```bash
+# On Windows
 python .\data\DataPreProcessing.py
-python '.\data\Illuminate ETL.py'
+python .\data\Illuminate ETL.py
+```
+```bash
+# On macOS/Linux
+python3 ./data/DataPreProcessing.py
+python3 ./data/Illuminate ETL.py
 ```
 ### 5. Train model
 ```bash
+# On Windows
 python .\models\prepare_data.py
 python .\models\GBM_ML.py 
 ```
+```bash
+# On macOS/Linux
+python3 ./models/prepare_data.py
+python3 ./models/GBM_ML.py 
+```
 
 ### 6. Install React + Boostrap and their dependencies
+If Node.js and npm (Node Package Manager) are not installed on your system
+```bash
+brew install node
+```
+Then, run
 ```bash
 deactivate
 cd frontend
@@ -99,7 +123,8 @@ cd ..
 ```bash
 # On Windows
 setup.bat
-
+```
+```bash
 # On macOS/Linux
 ./setup.sh
 ```
