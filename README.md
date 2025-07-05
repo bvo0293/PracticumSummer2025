@@ -57,6 +57,7 @@ cd PracticumSummer2025
 # On Windows
 python -m venv backend/venv
 .\backend\venv\Scripts\activate
+pip install -r backend/requirements.txt
 ```
 ```bash
 # On macOS/Linux

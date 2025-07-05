@@ -90,10 +90,10 @@ def load_all_assets():
     assets = {}
     try:
         # Load data
-        assets['grades'] = pd.read_csv("Data/Final_DF.csv", low_memory=False)
-        assets['courses'] = pd.read_csv("Data/Courses.csv")
-        assets['grad_summary'] = pd.read_csv("Data/GraduationAreaSummary.csv")
-        assets['illuminate'] = pd.read_csv("Data/cleaned_illuminate.csv", low_memory=False)
+        assets['grades'] = pd.read_csv("data/processed/Final_DF.csv", low_memory=False)
+        assets['courses'] = pd.read_csv("data/raw/Courses.csv")
+        assets['grad_summary'] = pd.read_csv("data/raw/GraduationAreaSummary.csv")
+        assets['illuminate'] = pd.read_csv("data/processed/cleaned_illuminate.csv", low_memory=False)
 
         # Clean column names for all loaded dataframes
         for df_name in ['grades', 'courses', 'grad_summary', 'illuminate']:
@@ -112,8 +112,8 @@ def load_all_assets():
             assets['illuminate']['Department'] = assets['illuminate']['Department'].str.upper().str.strip()
 
         # Load ML model and features
-        assets['model'] = joblib.load('student_success_model.pkl')
-        training_cols_df = pd.read_csv("Data/training_data_v2.csv")
+        assets['model'] = joblib.load('models/student_success_model.pkl')
+        training_cols_df = pd.read_csv("data/processed/training_data_v2.csv")
         assets['model_features'] = training_cols_df.drop('Success', axis=1).columns.tolist()
 
         # Pre-compute student vectors for collaborative filtering
