@@ -11,6 +11,8 @@ scipy
 statsmodels
 joblib
 xgboost
+torch
+transformers
 
 # Visualization
 matplotlib
