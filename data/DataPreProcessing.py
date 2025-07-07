@@ -46,7 +46,7 @@ def truncate_text(text, length=40):
 sg['CourseDesc'] = sg['CourseDesc'].apply(remove_html_tags)
 sg['CourseDesc'] = sg['CourseDesc'].apply(truncate_text)
 
-sg.to_csv('data\processed\StudentTeacherGradeCombined.csv', index=False)
+sg.to_csv('data/processed/StudentTeacherGradeCombined.csv', index=False)
 print("StudentTeacherGradeCombined.csv created")
 
 print("Creating IlluminateCombined.csv!!!")
