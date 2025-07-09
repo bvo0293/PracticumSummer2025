@@ -90,8 +90,8 @@ python .\data\Illuminate ETL.py
 ```
 ```bash
 # On macOS/Linux
-python3 ./data/DataPreProcessing.py
-python3 ./data/Illuminate ETL.py
+python3 "./data/DataPreProcessing.py"
+python3 "./data/Illuminate ETL.py"
 ```
 ### 5. Train model
 ```bash
@@ -101,8 +101,8 @@ python .\models\GBM_ML.py
 ```
 ```bash
 # On macOS/Linux
-python3 ./models/prepare_data.py
-python3 ./models/GBM_ML.py 
+python3 "./models/prepare_data.py"
+python3 "./models/GBM_ML.py"
 ```
 
 ### 6. Install React + Boostrap and their dependencies
