@@ -82,7 +82,8 @@ Student Teacher Grade 2024.csv
 Student Teacher Grade 2022.csv
 ```
 ### 4. Make sure the files are all available then derive processed files
-
+The DataPreProcessing.py file performs transformations (combining Student Teacher Grade data, filtering for only High School student, determining active students) to create the Final_DF.csv in `data/processed/` folder.
+The Illuminate ETL.py file performs transformation to combine the Illuminate data to a unique file IlluminateCombined.csv in `data/processed/` folder.
 ```bash
 # On Windows
 python .\data\DataPreProcessing.py
@@ -94,6 +95,8 @@ python3 "./data/DataPreProcessing.py"
 python3 "./data/Illuminate ETL.py"
 ```
 ### 5. Train model
+The prepare_data.py helps prep the data in the way that would allows us to utilize different features to run our GBM model in GBM_ML.py
+The GBM_ML.py generates the necessary ML model and results 
 ```bash
 # On Windows
 python .\models\prepare_data.py
@@ -107,6 +110,20 @@ python3 "./models/GBM_ML.py"
 
 ### 6. Install React + Boostrap and their dependencies
 If Node.js and npm (Node Package Manager) are not installed on your system
+For Windows:
+	1.	Go to the official Node.js download page
+👉 https://nodejs.org
+	2.	Download the LTS (Long Term Support) version
+This version is more stable and recommended for most users.
+	3.	Run the installer (.msi file)
+	•	Double-click the downloaded file.
+	•	Accept the license agreement.
+	•	Choose the destination folder (default is fine).
+	•	Make sure npm package manager is selected (it is by default).
+	•	Optionally install tools for native modules (optional, but useful for some packages).
+	4.	Finish the installation and restart your terminal/PowerShell.
+
+For MacOS:
 ```bash
 brew install node
 ```
