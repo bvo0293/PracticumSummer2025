@@ -164,6 +164,7 @@ Re-activate virtual environment
 ```bash
 source backend/venv/bin/activate
 ```
+Run streamlit 
 ```bash
 streamlit run streamlit/stream_lit_with_LLM.py
 ```
