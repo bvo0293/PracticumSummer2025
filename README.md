@@ -163,5 +163,4 @@ setup.bat
 
 ---
 
-Let us know if you'd like to contribute or raise an issue. Happy coding!
 
