@@ -155,6 +155,19 @@ setup.bat
 ./setup.sh
 ```
 
+### Optional: We only have the demo for LLM in streamlit, so you can try to run this
+Install streamlit
+```bash
+pip3 install streamlit
+```
+Re-activate virtual environment
+```bash
+source backend/venv/bin/activate
+```
+```bash
+streamlit run streamlit/stream_lit_with_LLM.py
+```
+
 ## Contributors
 
 - Bao Vo
